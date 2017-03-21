@@ -26,8 +26,6 @@ services:
     command: /bin/ash -c "envsubst '$$NGINX_HOST $$IPV6 $$NGINX_SSL_CERT $$NGINX_SSL_KEY $$NGINX_DHPARAM' < /etc/nginx/nginx.conf.template > /etc/nginx/nginx.conf && nginx"
   mysql:
     image: mariadb:latest
-    ports:
-      - "127.0.0.1:3306:3306"
     env_file:
       - mysql/vars.env
     volumes:
