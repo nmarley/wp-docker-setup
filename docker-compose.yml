@@ -1,0 +1,35 @@
+version: '2'
+services:
+  php: 
+    image: php:7-fpm-alpine-mysqli
+    links:
+      - mysql
+    ports:
+      - "127.0.0.1:9000:9000"
+    volumes:
+      - ./shared/code:/webroot
+      - ./php/php-log.conf:/usr/local/etc/php-fpm.d/zz-log.conf
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    links:
+      - php
+    env_file:
+      - nginx/vars.env
+    volumes:
+      - ./shared/code:/webroot
+      - ./nginx/nginx.conf.template:/etc/nginx/nginx.conf.template
+      - ./nginx/ssl:/ssl
+      - /var/log/nginx/:/logs/
+    command: /bin/ash -c "envsubst '$$NGINX_HOST $$IPV6 $$NGINX_SSL_CERT $$NGINX_SSL_KEY $$NGINX_DHPARAM' < /etc/nginx/nginx.conf.template > /etc/nginx/nginx.conf && nginx"
+  mysql:
+    image: mariadb:latest
+    ports:
+      - "3306:3306"
+    env_file:
+      - mysql/vars.env
+    volumes:
+      - ./mysql/mysql-datadir:/var/lib/mysql
+      - ./shared/code:/webroot
